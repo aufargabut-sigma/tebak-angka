@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🎯 Game Tebak Angka</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.9.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.9.1/core.js"></script>
+</head>
+<body>
+   <center> <h1>🎮 Game Tebak Angka</h1> </center>
+    <p>Saya punya angka antara <b>1 sampai 20</b>. Coba tebak ya!</p>
+    <p>Kamu punya <span id="sisa">7</span> percobaan tersisa.</p>
+
+    <input id="tebakan" type="number" min="1" max="20" placeholder="Masukkan angka">
+    <button id="cek">Cek Tebakan</button>
+    <button id="ulang">Main Lagi</button>
+
+    <h3 id="hasil" style="color:blue;"></h3>
+
+    <py-script>
+        import random
+        from js import document
+        from pyodide.ffi import create_proxy  # ✅ ini penting!
+
+        angka_rahasia = random.randint(1, 20)
+        percobaan = 7
+
+        def cek_tebakan(event):
+            global angka_rahasia, percobaan
+
+            input_elem = document.getElementById("tebakan")
+            hasil_elem = document.getElementById("hasil")
+            sisa_elem = document.getElementById("sisa")
+
+            if percobaan <= 0:
+                hasil_elem.innerText = "😢 Kesempatanmu habis! Tekan 'Main Lagi' untuk coba lagi."
+                return
+
+            try:
+                tebakan = int(input_elem.value)
+            except:
+                hasil_elem.innerText = "⚠️ Masukkan angka yang valid!"
+                return
+
+            percobaan -= 1
+            sisa_elem.innerText = percobaan
+
+            if tebakan < angka_rahasia:
+                hasil_elem.innerText = "📉 Terlalu kecil!"
+            elif tebakan > angka_rahasia:
+                hasil_elem.innerText = "📈 Terlalu besar!"
+            else:
+                hasil_elem.innerText = f"🎉 Benar! Angkanya adalah {angka_rahasia}!"
+                percobaan = 0
+                return
+
+            if percobaan == 0 and tebakan != angka_rahasia:
+                hasil_elem.innerText = f"😢 Kesempatan habis! Angka yang benar adalah {angka_rahasia}."
+
+        def reset_game(event):
+            global angka_rahasia, percobaan
+            angka_rahasia = random.randint(1, 20)
+            percobaan = 7
+            document.getElementById("sisa").innerText = percobaan
+            document.getElementById("hasil").innerText = ""
+            document.getElementById("tebakan").value = ""
+
+        # ✅ buat proxy biar fungsi gak hilang setelah event
+        cek_proxy = create_proxy(cek_tebakan)
+        ulang_proxy = create_proxy(reset_game)
+
+        document.getElementById("cek").addEventListener("click", cek_proxy)
+        document.getElementById("ulang").addEventListener("click", ulang_proxy)
+    </py-script>
+
+    <h5>©aufar ahmad fauzi</h5>
+</body>
+</html>
